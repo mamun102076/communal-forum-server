@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 const port = process.env.PORT || 5000
 
@@ -15,9 +15,36 @@ async function run() {
     try {
         const postsCollections = client.db('communalForum').collection('posts')
 
-        app.post('/posts', async (req, res) => {
+        app.get('/posts', async (req,res) => {
+            const query = {}
+            const result = await postsCollections.find(query).toArray()
+            res.send(result)
+        })
+
+        app.get('/posts/:id', async (req,res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+            const result = await postsCollections.findOne(filter)
+            res.send(result)
+        })
+
+        app.post('/posts', async (req,res) => {
             const query = req.body
             const result = await postsCollections.insertOne(query)
+            res.send(result)
+        })
+
+        app.put('/posts/:id', async (req,res) => {
+            const id = req.params.id
+            const count = req.body
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true }
+            const updatedDoc = {
+                $set: {
+                    likes: count.count
+                }
+            }
+            const result = await postsCollections.updateOne(filter, updatedDoc, options)
             res.send(result)
         })
     }
