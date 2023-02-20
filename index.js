@@ -14,11 +14,23 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         const postsCollections = client.db('communalForum').collection('posts')
+        const usersCollections = client.db('communalForum').collection('users')
+        const commentsCollections = client.db('communalForum').collection('comments')
 
         app.get('/posts', async (req,res) => {
             const query = {}
             const result = await postsCollections.find(query).toArray()
             res.send(result)
+        })
+
+        app.get('/posts/count', async (req,res) => {
+            const query = {}
+            const sort = {likes: -1}
+            const results = await postsCollections.find(query).sort(sort).limit(3).toArray()
+           
+            // const alredyBooked = results.map(result => result.likes)
+            // console.log(results)
+            res.send(results)
         })
 
         app.get('/posts/:id', async (req,res) => {
@@ -45,6 +57,61 @@ async function run() {
                 }
             }
             const result = await postsCollections.updateOne(filter, updatedDoc, options)
+            res.send(result)
+        })
+
+        app.get('/users', async (req,res) => {
+            const query = {}
+            const result = await usersCollections.find(query).toArray()
+            res.send(result)
+        })
+
+        app.get('/users/:email', async (req,res) => {
+            const email = req.params.email
+            const query = {email: email}
+            const result = await usersCollections.findOne(query)
+            res.send(result)
+        })
+
+        app.post('/users', async (req,res) => {
+            const query = req.body
+            const result = await usersCollections.insertOne(query)
+            res.send(result)
+        })
+
+        app.put('/users/:email', async (req,res) => {
+            const newFiled = req.body
+            const email = req.params.email
+            const filter = {email: email}
+            const updatedDoc = {
+                $set: {
+                    name: newFiled.name,
+                    email: newFiled.email,
+                    university: newFiled.university,
+                    address: newFiled.address
+                }
+            }
+            const optins = { upsert: true }
+            const result = await usersCollections.updateOne(filter, updatedDoc,optins)
+            res.send(result)
+        })
+
+        app.get('/comments', async (req,res) => {
+            const query = {}
+            const result = await commentsCollections.find(query).toArray()
+            res.send(result)
+        })
+        
+        app.get('/comments/:id', async (req,res) => {
+            const id = req.params.id
+            const filter = { commentId: id }
+            const result = await commentsCollections.find(filter).toArray()
+            res.send(result)
+        })
+
+        app.post('/comments', async (req,res) => {
+            const query = req.body
+            const result = await commentsCollections.insertOne(query)
             res.send(result)
         })
     }
