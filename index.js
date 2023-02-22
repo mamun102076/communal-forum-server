@@ -66,9 +66,9 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/users/:email', async (req,res) => {
-            const email = req.params.email
-            const query = {email: email}
+        app.get('/users/:id', async (req,res) => {
+            const id = req.params.id
+            const query = {uid: id}
             const result = await usersCollections.findOne(query)
             res.send(result)
         })
@@ -79,10 +79,10 @@ async function run() {
             res.send(result)
         })
 
-        app.put('/users/:email', async (req,res) => {
+        app.put('/users/:id', async (req,res) => {
             const newFiled = req.body
-            const email = req.params.email
-            const filter = {email: email}
+            const id = req.params.id
+            const filter = { uid: id }
             const updatedDoc = {
                 $set: {
                     name: newFiled.name,
