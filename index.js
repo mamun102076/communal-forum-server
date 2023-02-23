@@ -52,8 +52,8 @@ async function run() {
             const filter = { _id: new ObjectId(id) }
             const options = { upsert: true }
             const updatedDoc = {
-                $set: {
-                    likes: count.count
+                $inc: {
+                    likes: 1
                 }
             }
             const result = await postsCollections.updateOne(filter, updatedDoc, options)
